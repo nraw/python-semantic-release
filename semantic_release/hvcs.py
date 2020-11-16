@@ -356,6 +356,7 @@ def get_hvcs() -> Base:
     :raises ImproperConfigurationError: if the hvcs option provided is not valid
     """
     hvcs = config.get("hvcs")
+    hvcs = "Github" if hvcs == "origin" else hvcs
     try:
         return globals()[hvcs.capitalize()]
     except KeyError:

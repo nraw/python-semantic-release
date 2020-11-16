@@ -1,3 +1,4 @@
+import os
 from typing import Iterable, Optional
 
 from ..settings import config
@@ -14,12 +15,19 @@ def get_changelog_sections(changelog: dict, changelog_sections: list) -> Iterabl
             yield section
 
 
+def get_remote_url(hash_: str, remote: str) -> str:
+    url = os.popen("git remote get-url origin").read()
+    url = url.replace(".git\n", f"/commit/{hash_}")
+    return url
+
+
 def get_hash_link(owner: str, repo_name: str, hash_: str) -> str:
-    url = (
-        f"https://gitlab.com/{owner}/{repo_name}/-/commit/{hash_}"
-        if config.get("hvcs") == "gitlab"
-        else f"https://github.com/{owner}/{repo_name}/commit/{hash_}"
-    )
+    if config.get("hvcs") == "gitlab":
+        url = f"https://gitlab.com/{owner}/{repo_name}/-/commit/{hash_}"
+    elif config.get("hvcs") == "origin":
+        url = get_remote_url(hash_, remote="origin")
+    else:
+        url = f"https://github.com/{owner}/{repo_name}/commit/{hash_}"
     short_hash = hash_[:7]
     return f"[`{short_hash}`]({url})"
 
